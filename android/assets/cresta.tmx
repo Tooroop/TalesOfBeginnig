@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="ts_cresta" tilewidth="16" tileheight="16">
+  <image source="ts_cresta.png" width="777" height="263"/>
+  <tile id="66">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="67">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="68">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="69">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="114">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="115">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="116">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="117">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="119">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="120">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="121">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="122">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="162">
+   <properties>
+    <property name="BLOCKED" value=""/>
+    <property name="DOOR" value=""/>
+   </properties>
+  </tile>
+  <tile id="163">
+   <properties>
+    <property name="BLOCKED" value=""/>
+    <property name="DOOR" value=""/>
+   </properties>
+  </tile>
+  <tile id="164">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="165">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="167">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="168">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="169">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="170">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="215">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="216">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="217">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+  <tile id="218">
+   <properties>
+    <property name="BLOCKED" value=""/>
+   </properties>
+  </tile>
+ </tileset>
+ <layer name="Tile Layer 1" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztzbcNgEAABMHvDdMQRphy4BGmIUwtL7ElEF3CBRNPCiGkn+vQY8AofFds2HEI3xMXbjzCN0OOAqXwrVCjQSt8J8yIWISvmZmZmdlXL370b1I=
+  </data>
+ </layer>
+</map>
