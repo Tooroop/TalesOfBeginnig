@@ -21,6 +21,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
     private Texture playerTexture;
     private Animation bottomWalk;
+    private Animation sideWalk;
+    private Animation topWalk;
     private Player player;
 	
 	@Override
@@ -29,14 +31,23 @@ public class MyGdxGame extends ApplicationAdapter {
         mapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
         camera = new OrthographicCamera();
 
-        playerTexture = new Texture("spritesheet_leon.png");
-        TextureRegion[][] regions = TextureRegion.split(playerTexture, 17, 30);
-        bottomWalk = new Animation(0, regions[3][0], regions[3][1], regions[3][2], regions[0][3]);
+        playerTexture = new Texture("spritesheet_leon_walk.png");
+        TextureRegion[][] regions = TextureRegion.split(playerTexture, 16, 29);
+        bottomWalk = new Animation(0.05f, regions[0][0], regions[0][1], regions[0][2], regions[0][3], regions[0][4]);
+        topWalk = new Animation(0.05f, regions[0][5], regions[0][6], regions[0][7], regions[0][8], regions[0][9]);
+        sideWalk = new Animation(0.05f, regions[0][10], regions[0][11], regions[0][12], regions[0][13], regions[0][14]);
+
         bottomWalk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
-        
-        player = new Player(new Sprite(regions[2][0]));
-        player.setState(Player.State.BOTTOM);
-        player.setPosition(0, 0);
+        topWalk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+        sideWalk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
+
+        Player.WIDTH = 1 / 16f * regions[0][0].getRegionWidth();
+        Player.HEIGHT = 1 / 16f * regions[0][0].getRegionHeight();
+
+        player = new Player();
+        player.setState(Player.State.NORMAL);
+
+        Gdx.input.setInputProcessor(new PlayerInputProcessor(player));
 	}
 
     @Override
@@ -67,57 +78,72 @@ public class MyGdxGame extends ApplicationAdapter {
     public void dispose() {
         this.tiledMap.dispose();
         this.mapRenderer.dispose();
-        this.player.getTexture().dispose();
         super.dispose();
     }
 
     private void updatePlayer(float deltaTime){
-
+        if (deltaTime == 0) return;
         player.stateTime += deltaTime;
 
-        if(Gdx.input.isKeyPressed(Input.Keys.A)){
-            player.setPosition(player.getX() - Player.MAX_VELOCITY, player.getY());
-            player.setState(Player.State.LEFT);
+        switch (player.getState()){
+            case LEFT:
+                player.position.x -= Player.MAX_VELOCITY;
+                break;
+            case RIGHT:
+                player.position.x += Player.MAX_VELOCITY;
+                break;
+            case BOTTOM:
+                player.position.y -= Player.MAX_VELOCITY;
+                break;
+            case TOP:
+                player.position.y += Player.MAX_VELOCITY;
+                break;
+            case NORMAL:
+                break;
         }
-
-        if(Gdx.input.isKeyPressed(Input.Keys.D)){
-            player.setPosition(player.getX() + Player.MAX_VELOCITY, player.getY());
-            player.setState(Player.State.RIGHT);
-        }
-
-        if(Gdx.input.isKeyPressed(Input.Keys.W)){
-            player.setPosition(player.getX(), player.getY() + Player.MAX_VELOCITY);
-            player.setState(Player.State.TOP);
-        }
-
-        if(Gdx.input.isKeyPressed(Input.Keys.S)){
-            player.setPosition(player.getX(), player.getY() - Player.MAX_VELOCITY);
-            player.setState(Player.State.BOTTOM);
-        }
-
     }
 
-    private void renderPlayer(){
+    private void renderPlayer() {
 
         TextureRegion frame = null;
 
         switch (player.getState()) {
             case LEFT:
+                if(sideWalk.getKeyFrame(player.stateTime).isFlipX()){
+                    sideWalk.getKeyFrame(player.stateTime).flip(true, false);
+                }
+                frame = sideWalk.getKeyFrame(player.stateTime);
                 break;
             case RIGHT:
+                if(!sideWalk.getKeyFrame(player.stateTime).isFlipX()){
+                    sideWalk.getKeyFrame(player.stateTime).flip(true, false);
+                }
+                frame = sideWalk.getKeyFrame(player.stateTime);
                 break;
             case BOTTOM:
-                frame = bottomWalk.getKeyFrame(0);
+                frame = bottomWalk.getKeyFrame(player.stateTime);
                 break;
             case TOP:
+                frame = topWalk.getKeyFrame(player.stateTime);
+                break;
+            case NORMAL:
+                if(player.getLastState() == Player.State.TOP){
+                    frame = topWalk.getKeyFrames()[2];
+                } else if(player.getLastState() == Player.State.BOTTOM){
+                    frame = bottomWalk.getKeyFrames()[2];
+                } else if(player.getLastState() == Player.State.LEFT || player.getLastState() == Player.State.RIGHT){
+                    frame = sideWalk.getKeyFrames()[2];
+                } else{
+                    frame = bottomWalk.getKeyFrames()[2];
+                }
+
                 break;
         }
 
-        if(frame != null)
-        player.setTexture(frame.getTexture());
-
-        mapRenderer.getBatch().begin();
-        player.draw(mapRenderer.getBatch());
-        mapRenderer.getBatch().end();
+        if (frame != null) {
+            mapRenderer.getBatch().begin();
+            mapRenderer.getBatch().draw(frame, player.position.x, player.position.y);
+            mapRenderer.getBatch().end();
+        }
     }
 }
