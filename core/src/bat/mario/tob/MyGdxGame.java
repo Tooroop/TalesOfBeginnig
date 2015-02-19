@@ -12,8 +12,23 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
+import com.badlogic.gdx.physics.box2d.BodyDef;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.PolygonShape;
+import com.badlogic.gdx.physics.box2d.World;
 
 public class MyGdxGame extends ApplicationAdapter {
+
+    private static final int UNITS_PER_PIXEL = 16;
+    private static final float WORLD_TO_BOX = 0.01f;
+    private static final float BOX_TO_WORLD = 100f;
+
+    private World world;
+    private Box2DDebugRenderer debugRenderer;
+    private MapBodyManager mapBodyManager;
 
 	private TiledMap tiledMap;
     private OrthogonalTiledMapRenderer mapRenderer;
@@ -27,9 +42,16 @@ public class MyGdxGame extends ApplicationAdapter {
 	
 	@Override
 	public void create () {
+        world = new World(new Vector2(0, -9.8f), true);
+        debugRenderer = new Box2DDebugRenderer(true, true, true, true, true, true);
+
 		tiledMap = new TmxMapLoader().load("cresta.tmx");
         mapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
         camera = new OrthographicCamera();
+
+        mapBodyManager = new MapBodyManager(world, UNITS_PER_PIXEL);
+        mapBodyManager.createPhysics(tiledMap);
+
 
         playerTexture = new Texture("spritesheet_leon_walk.png");
         TextureRegion[][] regions = TextureRegion.split(playerTexture, 16, 29);
@@ -41,11 +63,27 @@ public class MyGdxGame extends ApplicationAdapter {
         topWalk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
         sideWalk.setPlayMode(Animation.PlayMode.LOOP_PINGPONG);
 
-        Player.WIDTH = 1 / 16f * regions[0][0].getRegionWidth();
-        Player.HEIGHT = 1 / 16f * regions[0][0].getRegionHeight();
-
-        player = new Player();
+        player = new Player(world, UNITS_PER_PIXEL);
+        player.setPosition(0, 0);
+        player.setSize(16, 29);
+        player.setRegion(regions[0][0]);
         player.setState(Player.State.NORMAL);
+
+
+        //Player body definition
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+
+        final PolygonShape shape = new PolygonShape();
+
+        Vector2 size = new Vector2(((player.getX() + player.getWidth()) * 0.5f) / UNITS_PER_PIXEL, ((player.getY() + player.getHeight()) * 0.5f) / UNITS_PER_PIXEL);
+
+        final float halfWidth = (player.getWidth() * 0.5f) / UNITS_PER_PIXEL;
+        final float halfHeight = (player.getHeight() * 0.5f) / UNITS_PER_PIXEL;
+        shape.setAsBox(halfWidth, halfHeight, size, 0.0f);
+
+        Body body = world.createBody(bodyDef);
+        body.createFixture(shape, 1);
 
         Gdx.input.setInputProcessor(new PlayerInputProcessor(player));
 	}
@@ -72,12 +110,18 @@ public class MyGdxGame extends ApplicationAdapter {
         updatePlayer(deltaTime);
         renderPlayer();
 
+//        Matrix4 cameraCopy = camera.combined.cpy();
+        debugRenderer.render(world, camera.combined);
+
+        world.step(1/60f, 6, 2);
+
 	}
 
     @Override
     public void dispose() {
         this.tiledMap.dispose();
         this.mapRenderer.dispose();
+        this.mapBodyManager.destroyPhysics();
         super.dispose();
     }
 
@@ -87,16 +131,16 @@ public class MyGdxGame extends ApplicationAdapter {
 
         switch (player.getState()){
             case LEFT:
-                player.position.x -= Player.MAX_VELOCITY;
+                player.setPosition(player.getX()- Player.MAX_VELOCITY, player.getY());
                 break;
             case RIGHT:
-                player.position.x += Player.MAX_VELOCITY;
+                player.setPosition(player.getX() + Player.MAX_VELOCITY, player.getY());
                 break;
             case BOTTOM:
-                player.position.y -= Player.MAX_VELOCITY;
+                player.setPosition(player.getX(), player.getY() - Player.MAX_VELOCITY);
                 break;
             case TOP:
-                player.position.y += Player.MAX_VELOCITY;
+                player.setPosition(player.getX(), player.getY() + Player.MAX_VELOCITY);
                 break;
             case NORMAL:
                 break;
@@ -142,7 +186,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
         if (frame != null) {
             mapRenderer.getBatch().begin();
-            mapRenderer.getBatch().draw(frame, player.position.x, player.position.y);
+            player.setRegion(frame);
+            player.draw(mapRenderer.getBatch());
             mapRenderer.getBatch().end();
         }
     }
